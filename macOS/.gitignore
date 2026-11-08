@@ -3,3 +3,4 @@ build.log
 xcuserdata/
 *.xcuserstate
 DerivedData/
+__pycache__/
