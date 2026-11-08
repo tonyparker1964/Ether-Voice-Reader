@@ -7,7 +7,7 @@ This version generates narration on an Apple Silicon Mac using MLX Audio and Qwe
 1. Download this repository with **Code → Download ZIP**, extract it, and open `local-mac`.
 2. Open Terminal, type `bash ` (with a trailing space), drag `Start.command` into Terminal, and press Return. This works even if ZIP extraction removes the executable flag. With an executable copy, you can also double-click `Start.command`.
 3. The first launch installs Python packages. The reader opens at **http://127.0.0.1:8765**. Keep Terminal open while using it. Stop it with Control-C.
-4. Choose your voice sample, then press **Save voice sample on this Mac**. WebM, WAV, M4A, and MP3 are converted locally. Choose 3–30 seconds of clean speech; 5–15 seconds is a good starting point.
+4. Record your voice right in the page: read the script in **Record your voice here**, press Stop, play it back, then press **Use this recording as my voice** (the transcript fills in automatically; your browser asks for microphone permission the first time). Or choose an existing voice file and press **Save voice sample on this Mac**. WebM, WAV, M4A, and MP3 are converted locally. Choose 3–30 seconds of clean speech; 5–15 seconds is a good starting point.
 5. Enter the exact words in that sample. Paste a new passage and press **Generate in my voice**.
 
 Python 3.10+ with Apple Silicon support is required; Python 3.11 is recommended. The launcher uses `python3`. Initial package installation and the first model download require internet and several GB of free disk space. The first generation can take several minutes. Subsequent narration uses the downloaded model locally. A service may still be required by the browser for optional spoken commands; narration itself runs on the Mac.
