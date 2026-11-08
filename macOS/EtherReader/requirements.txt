@@ -1,0 +1,4 @@
+mlx-audio
+soundfile
+imageio-ffmpeg
+numpy

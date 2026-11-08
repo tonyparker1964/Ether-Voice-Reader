@@ -1,0 +1,289 @@
+// !$*UTF8*$!
+{
+	archiveVersion = 1;
+	classes = {
+	};
+	objectVersion = 56;
+	objects = {
+
+/* Begin PBXBuildFile section */
+		8D9F2130579964AB1642D739 /* EtherReaderApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = ED1D7256E184DEF5078893C6 /* EtherReaderApp.swift */; };
+		62ADFAF7EDC910F8379C61C6 /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1A4C8F32E95A9FD25E99B0F8 /* ContentView.swift */; };
+		CD6C16058B34632D78B5D16D /* MicTestView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1FEACFDB49BD2A0F3D15B4D1 /* MicTestView.swift */; };
+		6C2D5BF3CAED42A3F67F4EEF /* RecordView.swift in Sources */ = {isa = PBXBuildFile; fileRef = F57FC82C29CD32D33086C7A7 /* RecordView.swift */; };
+		34C776FE34F8473DD8303F94 /* NarrateView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8675C966A5874594F118833F /* NarrateView.swift */; };
+		480B06B814D1BAD6B0729940 /* EngineView.swift in Sources */ = {isa = PBXBuildFile; fileRef = BD79355E6DCBBC953870DD17 /* EngineView.swift */; };
+		D21B1C91973542DA9177EE3F /* MicManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 02FE285C27C347C5B1D79090 /* MicManager.swift */; };
+		124E406E50F90AD1BF08FE87 /* VoiceEngine.swift in Sources */ = {isa = PBXBuildFile; fileRef = D0881D3E29EEEA0623F7DE02 /* VoiceEngine.swift */; };
+		7D1FBC6845518F7117F3B477 /* Player.swift in Sources */ = {isa = PBXBuildFile; fileRef = B477F222D054FD1C10B31BA0 /* Player.swift */; };
+		BCDBE9EEC71E6DA78A51CE4B /* ether_tts.py in Resources */ = {isa = PBXBuildFile; fileRef = 0FD53C8CCF756396549F8F70 /* ether_tts.py */; };
+		32FD849CD5AE89C43867C596 /* requirements.txt in Resources */ = {isa = PBXBuildFile; fileRef = 6ED5FED79E9BF9DA925DD578 /* requirements.txt */; };
+/* End PBXBuildFile section */
+
+/* Begin PBXFileReference section */
+		D2A57DC1D883FD21FB995169 /* Ether Reader.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "Ether Reader.app"; sourceTree = BUILT_PRODUCTS_DIR; };
+		ED1D7256E184DEF5078893C6 /* EtherReaderApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EtherReaderApp.swift; sourceTree = "<group>"; };
+		1A4C8F32E95A9FD25E99B0F8 /* ContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentView.swift; sourceTree = "<group>"; };
+		1FEACFDB49BD2A0F3D15B4D1 /* MicTestView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MicTestView.swift; sourceTree = "<group>"; };
+		F57FC82C29CD32D33086C7A7 /* RecordView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RecordView.swift; sourceTree = "<group>"; };
+		8675C966A5874594F118833F /* NarrateView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NarrateView.swift; sourceTree = "<group>"; };
+		BD79355E6DCBBC953870DD17 /* EngineView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EngineView.swift; sourceTree = "<group>"; };
+		02FE285C27C347C5B1D79090 /* MicManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MicManager.swift; sourceTree = "<group>"; };
+		D0881D3E29EEEA0623F7DE02 /* VoiceEngine.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VoiceEngine.swift; sourceTree = "<group>"; };
+		B477F222D054FD1C10B31BA0 /* Player.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Player.swift; sourceTree = "<group>"; };
+		0FD53C8CCF756396549F8F70 /* ether_tts.py */ = {isa = PBXFileReference; lastKnownFileType = text.script.python; path = ether_tts.py; sourceTree = "<group>"; };
+		6ED5FED79E9BF9DA925DD578 /* requirements.txt */ = {isa = PBXFileReference; lastKnownFileType = text; path = requirements.txt; sourceTree = "<group>"; };
+		7ECA4F52C504D53520A02786 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+/* End PBXFileReference section */
+
+/* Begin PBXFrameworksBuildPhase section */
+		4F6F5CC3FCCF73F75AE9CCF4 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXFrameworksBuildPhase section */
+
+/* Begin PBXGroup section */
+		1629A0BB4117BEFC577EF28D = {
+			isa = PBXGroup;
+			children = (
+				D8DBA3F9900DD17689CA0C4D /* EtherReader */,
+				86024CAD1E83101D97359D73 /* Products */,
+			);
+			sourceTree = "<group>";
+		};
+		D8DBA3F9900DD17689CA0C4D /* EtherReader */ = {
+			isa = PBXGroup;
+			children = (
+				ED1D7256E184DEF5078893C6 /* EtherReaderApp.swift */,
+				1A4C8F32E95A9FD25E99B0F8 /* ContentView.swift */,
+				1FEACFDB49BD2A0F3D15B4D1 /* MicTestView.swift */,
+				F57FC82C29CD32D33086C7A7 /* RecordView.swift */,
+				8675C966A5874594F118833F /* NarrateView.swift */,
+				BD79355E6DCBBC953870DD17 /* EngineView.swift */,
+				02FE285C27C347C5B1D79090 /* MicManager.swift */,
+				D0881D3E29EEEA0623F7DE02 /* VoiceEngine.swift */,
+				B477F222D054FD1C10B31BA0 /* Player.swift */,
+				0FD53C8CCF756396549F8F70 /* ether_tts.py */,
+				6ED5FED79E9BF9DA925DD578 /* requirements.txt */,
+				7ECA4F52C504D53520A02786 /* Info.plist */,
+			);
+			path = EtherReader;
+			sourceTree = "<group>";
+		};
+		86024CAD1E83101D97359D73 /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				D2A57DC1D883FD21FB995169 /* Ether Reader.app */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+/* End PBXGroup section */
+
+/* Begin PBXNativeTarget section */
+		42AEFBAE01D2DFD981F7DA7D /* EtherReader */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = DD5B959833E219C36151D647 /* Build configuration list for PBXNativeTarget "EtherReader" */;
+			buildPhases = (
+				F2AB5FB218DA8B84623F4557 /* Sources */,
+				4F6F5CC3FCCF73F75AE9CCF4 /* Frameworks */,
+				55B558C7EF820E6E00E5993B /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = EtherReader;
+			productName = EtherReader;
+			productReference = D2A57DC1D883FD21FB995169 /* Ether Reader.app */;
+			productType = "com.apple.product-type.application";
+		};
+/* End PBXNativeTarget section */
+
+/* Begin PBXProject section */
+		46F86FAA6BBF9AC94A7E4595 /* Project object */ = {
+			isa = PBXProject;
+			attributes = {
+				BuildIndependentTargetsInParallel = 1;
+				LastSwiftUpdateCheck = 1500;
+				LastUpgradeCheck = 1500;
+				TargetAttributes = {
+					42AEFBAE01D2DFD981F7DA7D = {
+						CreatedOnToolsVersion = 15.0;
+					};
+				};
+			};
+			buildConfigurationList = 2CA666E9AB7FD185F98B8152 /* Build configuration list for PBXProject "EtherReader" */;
+			compatibilityVersion = "Xcode 14.0";
+			developmentRegion = en;
+			hasScannedForEncodings = 0;
+			knownRegions = (
+				en,
+				Base,
+			);
+			mainGroup = 1629A0BB4117BEFC577EF28D;
+			productRefGroup = 86024CAD1E83101D97359D73 /* Products */;
+			projectDirPath = "";
+			projectRoot = "";
+			targets = (
+				42AEFBAE01D2DFD981F7DA7D /* EtherReader */,
+			);
+		};
+/* End PBXProject section */
+
+/* Begin PBXResourcesBuildPhase section */
+		55B558C7EF820E6E00E5993B /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				BCDBE9EEC71E6DA78A51CE4B /* ether_tts.py in Resources */,
+				32FD849CD5AE89C43867C596 /* requirements.txt in Resources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXResourcesBuildPhase section */
+
+/* Begin PBXSourcesBuildPhase section */
+		F2AB5FB218DA8B84623F4557 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				8D9F2130579964AB1642D739 /* EtherReaderApp.swift in Sources */,
+				62ADFAF7EDC910F8379C61C6 /* ContentView.swift in Sources */,
+				CD6C16058B34632D78B5D16D /* MicTestView.swift in Sources */,
+				6C2D5BF3CAED42A3F67F4EEF /* RecordView.swift in Sources */,
+				34C776FE34F8473DD8303F94 /* NarrateView.swift in Sources */,
+				480B06B814D1BAD6B0729940 /* EngineView.swift in Sources */,
+				D21B1C91973542DA9177EE3F /* MicManager.swift in Sources */,
+				124E406E50F90AD1BF08FE87 /* VoiceEngine.swift in Sources */,
+				7D1FBC6845518F7117F3B477 /* Player.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXSourcesBuildPhase section */
+
+/* Begin XCBuildConfiguration section */
+		2D53B50AE2273FABAAF8B8FA /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				COPY_PHASE_STRIP = NO;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu17;
+				MACOSX_DEPLOYMENT_TARGET = 14.0;
+				SDKROOT = macosx;
+				DEBUG_INFORMATION_FORMAT = dwarf;
+				ENABLE_TESTABILITY = YES;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				ONLY_ACTIVE_ARCH = YES;
+				SWIFT_ACTIVE_COMPILATION_CONDITIONS = DEBUG;
+				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
+			};
+			name = Debug;
+		};
+		D4B2141B77146EF47E948847 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				COPY_PHASE_STRIP = NO;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu17;
+				MACOSX_DEPLOYMENT_TARGET = 14.0;
+				SDKROOT = macosx;
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				SWIFT_COMPILATION_MODE = wholemodule;
+				SWIFT_OPTIMIZATION_LEVEL = "-O";
+			};
+			name = Release;
+		};
+		FA7C752E798F561D7D156D98 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ARCHS = arm64;
+				CODE_SIGN_IDENTITY = "-";
+				CODE_SIGN_STYLE = Manual;
+				COMBINE_HIDPI_IMAGES = YES;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = "";
+				ENABLE_APP_SANDBOX = NO;
+				ENABLE_HARDENED_RUNTIME = NO;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = EtherReader/Info.plist;
+				INFOPLIST_KEY_CFBundleDisplayName = "Ether Reader";
+				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.productivity";
+				INFOPLIST_KEY_NSHumanReadableCopyright = "Ether";
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/../Frameworks",
+				);
+				MACOSX_DEPLOYMENT_TARGET = 14.0;
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.ether.reader;
+				PRODUCT_NAME = "Ether Reader";
+				SWIFT_EMIT_LOC_STRINGS = NO;
+				SWIFT_VERSION = 5.0;
+			};
+			name = Debug;
+		};
+		22F75101C717335ACF4089A0 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ARCHS = arm64;
+				CODE_SIGN_IDENTITY = "-";
+				CODE_SIGN_STYLE = Manual;
+				COMBINE_HIDPI_IMAGES = YES;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = "";
+				ENABLE_APP_SANDBOX = NO;
+				ENABLE_HARDENED_RUNTIME = NO;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = EtherReader/Info.plist;
+				INFOPLIST_KEY_CFBundleDisplayName = "Ether Reader";
+				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.productivity";
+				INFOPLIST_KEY_NSHumanReadableCopyright = "Ether";
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/../Frameworks",
+				);
+				MACOSX_DEPLOYMENT_TARGET = 14.0;
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.ether.reader;
+				PRODUCT_NAME = "Ether Reader";
+				SWIFT_EMIT_LOC_STRINGS = NO;
+				SWIFT_VERSION = 5.0;
+			};
+			name = Release;
+		};
+/* End XCBuildConfiguration section */
+
+/* Begin XCConfigurationList section */
+		2CA666E9AB7FD185F98B8152 /* Build configuration list for PBXProject "EtherReader" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				2D53B50AE2273FABAAF8B8FA /* Debug */,
+				D4B2141B77146EF47E948847 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		DD5B959833E219C36151D647 /* Build configuration list for PBXNativeTarget "EtherReader" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				FA7C752E798F561D7D156D98 /* Debug */,
+				22F75101C717335ACF4089A0 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+/* End XCConfigurationList section */
+	};
+	rootObject = 46F86FAA6BBF9AC94A7E4595 /* Project object */;
+}

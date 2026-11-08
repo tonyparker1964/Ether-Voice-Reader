@@ -1,0 +1,5 @@
+build/
+build.log
+xcuserdata/
+*.xcuserstate
+DerivedData/

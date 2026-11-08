@@ -1,5 +1,7 @@
 # Ether Voice Reader
 
+**New: native Mac app.** See [`macOS/`](macOS/README.md). It's a SwiftUI app with a mic test, lossless voice recording and on-device narration in your voice. The browser versions below are kept for reference.
+
 A personal reader for pasted passages and plain-text files, with browser narration, sentence navigation, bookmarks, spoken controls, and voice-sample recording.
 
 ## Use
