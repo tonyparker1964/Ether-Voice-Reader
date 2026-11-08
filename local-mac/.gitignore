@@ -1,0 +1,7 @@
+.venv/
+private-data/
+__pycache__/
+*.webm
+*.wav
+*.mp3
+*.m4a
