@@ -1,0 +1,387 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Ether · Voice Studio</title>
+<style>
+[hidden]{display:none!important}
+:root{color-scheme:dark;--gold:#d6b77b;--bg:#101c1b;--card:#172624;--muted:#b8c6c0}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:#efece0;font:16px/1.6 system-ui,-apple-system,sans-serif}
+header{padding:22px 5%;border-bottom:1px solid #ffffff20;display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap}
+.brand{letter-spacing:3px;color:var(--gold);text-decoration:none}
+nav a{color:var(--muted);text-decoration:none;margin-left:18px}nav a:hover,nav a.on{color:var(--gold)}
+main{max-width:920px;margin:auto;padding:40px 24px 60px}
+.eyebrow{font-size:12px;letter-spacing:3px;color:var(--gold)}
+h1{font:clamp(34px,5vw,54px) Georgia,serif;margin:10px 0}
+h2{font:23px Georgia,serif;margin:0 0 6px}
+p,small{color:var(--muted)}
+.card{border:1px solid #ffffff24;background:var(--card);border-radius:16px;padding:22px;margin:20px 0}
+button,select{font:inherit}
+button,.link{display:inline-flex;align-items:center;gap:6px;background:#263c36;color:#f6f0df;border:1px solid #ffffff30;border-radius:9px;padding:10px 16px;cursor:pointer;text-decoration:none}
+button:hover:not(:disabled),.link:hover{border-color:var(--gold)}
+button:disabled{opacity:.45;cursor:default}
+.primary{background:var(--gold);color:#13221c;border-color:var(--gold)}
+.rec{background:#c45a4a;border-color:#c45a4a;color:#fff}
+select{width:100%;max-width:440px;padding:9px;background:var(--bg);color:#fff;border:1px solid #ffffff30;border-radius:8px}
+textarea{width:100%;min-height:90px;resize:vertical;background:#111e1b;color:#eee8d9;border:1px solid #ffffff20;border-radius:10px;padding:14px;font:18px/1.6 Georgia,serif}
+.row{display:flex;gap:10px;flex-wrap:wrap;align-items:center;margin:12px 0}
+.meter{position:relative;height:16px;border-radius:6px;background:#ffffff14;overflow:hidden;margin-top:14px}
+.meter .fill{position:absolute;inset:0;background:linear-gradient(90deg,#3bb36b 0%,#3bb36b 60%,#e2c84a 80%,#d9534f 100%);clip-path:inset(0 100% 0 0);transition:clip-path .05s linear}
+.meter .peak{position:absolute;top:0;bottom:0;width:2px;background:#fff;left:0;opacity:0}
+.scale{display:flex;justify-content:space-between;font-size:11px;color:#8fa29a;margin-top:3px}
+.slider{display:grid;grid-template-columns:80px 1fr 60px;gap:10px;align-items:center;margin-top:12px}
+input[type=range]{width:100%;accent-color:var(--gold)}
+.mono{font:20px ui-monospace,Menlo,monospace;color:var(--gold)}
+.notice{padding:10px 12px;border-radius:9px;margin:10px 0;background:#e0a33a1c;color:#f0c27a;border:1px solid #e0a33a40}
+.notice.good{background:#3bb36b1c;color:#8fe0ae;border-color:#3bb36b40}
+audio{width:100%;margin:12px 0 4px}
+.or{color:var(--muted);font-size:13px}
+footer{color:#8fa29a;font-size:13px;margin-top:30px}
+</style>
+</head>
+<body>
+<header>
+  <a class="brand" href="index.html">ETHER / READER</a>
+  <nav><a href="index.html">Reader</a><a href="voice.html" class="on">Voice Studio</a></nav>
+</header>
+<main>
+  <div class="eyebrow">MIC TEST · VOICE RECORDING</div>
+  <h1>Voice Studio</h1>
+  <p>Test your microphone and record a clean voice sample in your browser. Nothing is uploaded — audio stays on your device until you download it. Narration in your own voice runs in the <strong>Ether Reader Mac app</strong>.</p>
+
+  <section class="card">
+    <h2>1 · Microphone</h2>
+    <div class="row">
+      <select id="device" aria-label="Microphone"><option value="">Default microphone</option></select>
+      <button id="listen" class="primary">Start listening</button>
+    </div>
+    <div class="meter" aria-hidden="true"><div class="fill" id="fill"></div><div class="peak" id="peakMark"></div></div>
+    <div class="scale"><span>−60 dB</span><span>−30</span><span>−12</span><span>0 dB</span></div>
+    <div class="slider"><label for="boost">Boost</label><input id="boost" type="range" min="0" max="40" step="1" value="0"><span id="boostVal" class="mono" style="font-size:15px">+0 dB</span></div>
+    <div class="row">
+      <button id="auto">✨ Auto-set level</button>
+      <small>Press, then read aloud for 4 seconds — the page sets Boost for you.</small>
+    </div>
+    <div id="live" class="notice" hidden></div>
+    <div id="btWarn" class="notice" hidden>Bluetooth mics (like AirPods) record in low quality and often sound crackly or hissy. A USB or wired mic is much better for a voice sample.</div>
+    <div id="msg" class="notice" hidden></div>
+    <small id="rateInfo"></small>
+  </section>
+
+  <section class="card">
+    <h2>2 · Five-second mic test</h2>
+    <p>Say a sentence in your reading voice. It plays back at full loudness so you can hear the quality; the advice is based on what your mic really picked up.</p>
+    <div class="row"><button id="testBtn">● Record 5-second test</button><span id="testTime" class="mono"></span></div>
+    <div id="testVerdict" class="notice" hidden></div>
+    <audio id="testAudio" controls hidden></audio>
+  </section>
+
+  <section class="card">
+    <h2>3 · Record your voice sample</h2>
+    <p>Read the script naturally in a quiet room. Aim for 8–15 seconds. You can edit the script — keep the downloaded transcript with your recording.</p>
+    <textarea id="script">The morning light moved slowly across the water. I opened the old book, took a breath, and began to read the story aloud, one quiet word at a time.</textarea>
+    <label class="row" style="margin-top:8px"><input type="checkbox" id="clean" checked> Clean up — remove rumble, lower hiss between words, even out the volume</label>
+    <div class="row">
+      <button id="recBtn" class="rec">● Start recording</button>
+      <button id="stopBtn" disabled>■ Stop</button>
+      <span id="recTime" class="mono">0:00 / 0:30</span>
+    </div>
+    <div id="recVerdict" class="notice" hidden></div>
+    <audio id="recAudio" controls hidden></audio>
+    <div class="row" id="recActions" hidden>
+      <a id="dlWav" class="link primary">⬇ Download voice (WAV)</a>
+      <a id="dlTxt" class="link">⬇ Download transcript</a>
+    </div>
+  </section>
+
+  <footer>Works best in Chrome, Edge or Safari. Your browser asks for microphone permission the first time.</footer>
+</main>
+
+<script>
+const $ = id => document.getElementById(id);
+const DB = v => v > 1e-6 ? 20 * Math.log10(v) : -160;
+const LIN = db => Math.pow(10, db / 20);
+let ctx, stream, source, node, listening = false;
+let boostDB = Number(localStorage.getItem('etherBoost') || 0);
+let winPeak = 0, winSum = 0, winCount = 0, shownPeak = -160, clipUntil = 0;
+let rec = null;          // {chunks, peak, max, start, done}
+let auto = null;         // {end, peak}
+const urls = {};
+
+function show(id, text, good) {
+  const el = $(id);
+  if (!text) { el.hidden = true; return; }
+  el.textContent = text; el.hidden = false; el.classList.toggle('good', !!good);
+}
+function verdict(peakDB) {
+  if (peakDB > -1) return ['Too loud — the sound is clipping, which causes distortion and crackle. Lower Boost (or your mic’s volume) or move back a little.', false];
+  if (peakDB < -24) return ['Too quiet — press Auto-set level and read aloud, or raise Boost until your loudest words reach the yellow zone.', false];
+  return ['Good level. This microphone is ready for recording.', true];
+}
+function setBoost(db) {
+  boostDB = Math.max(0, Math.min(40, Math.round(db)));
+  $('boost').value = boostDB; $('boostVal').textContent = '+' + boostDB + ' dB';
+  try { localStorage.setItem('etherBoost', boostDB); } catch (e) {}
+}
+setBoost(boostDB);
+$('boost').oninput = e => setBoost(Number(e.target.value));
+
+// ---- Capture ------------------------------------------------------------
+const workletCode = `class Tap extends AudioWorkletProcessor{constructor(){super();this.buf=new Float32Array(2048);this.n=0}
+process(inputs){const ch=inputs[0];if(ch&&ch.length){let best=ch[0];if(ch.length>1){let e0=0,e1=0;for(let i=0;i<ch[0].length;i++){e0+=ch[0][i]*ch[0][i];e1+=ch[1][i]*ch[1][i]}if(e1>e0*4)best=ch[1]}
+for(let i=0;i<best.length;i++){this.buf[this.n++]=best[i];if(this.n===this.buf.length){this.port.postMessage(this.buf.slice(0));this.n=0}}}return true}}
+registerProcessor('ether-tap',Tap);`;
+
+function onSamples(data) {
+  const g = LIN(boostDB);
+  const out = new Float32Array(data.length);
+  for (let i = 0; i < data.length; i++) {
+    const v = Math.max(-1, Math.min(1, data[i] * g));
+    out[i] = v; const a = Math.abs(v);
+    if (a > winPeak) winPeak = a;
+    winSum += v * v;
+  }
+  winCount += data.length;
+  if (rec && !rec.done) {
+    rec.chunks.push(out);
+    for (let i = 0; i < out.length; i++) { const a = Math.abs(out[i]); if (a > rec.peak) rec.peak = a; }
+  }
+}
+
+async function startListening() {
+  if (!navigator.mediaDevices?.getUserMedia) { show('msg', 'This browser cannot use the microphone. Try Chrome, Edge or Safari.'); return false; }
+  await stopListening();
+  const id = $('device').value;
+  try {
+    stream = await navigator.mediaDevices.getUserMedia({ audio: {
+      deviceId: id ? { exact: id } : undefined,
+      echoCancellation: false, noiseSuppression: false, autoGainControl: false } });
+  } catch (e) {
+    show('msg', e.name === 'NotAllowedError'
+      ? 'Microphone access was blocked. Allow the microphone for this site in your browser settings, then try again.'
+      : 'Could not open the microphone: ' + e.message);
+    return false;
+  }
+  ctx = new (window.AudioContext || window.webkitAudioContext)();
+  await ctx.resume();
+  source = ctx.createMediaStreamSource(stream);
+  try {
+    const url = URL.createObjectURL(new Blob([workletCode], { type: 'application/javascript' }));
+    await ctx.audioWorklet.addModule(url);
+    node = new AudioWorkletNode(ctx, 'ether-tap');
+    node.port.onmessage = e => onSamples(e.data);
+  } catch (e) {               // older browsers
+    node = ctx.createScriptProcessor(2048, 1, 1);
+    node.onaudioprocess = e => onSamples(e.inputBuffer.getChannelData(0));
+  }
+  const mute = ctx.createGain(); mute.gain.value = 0;   // keep the graph running without echo
+  source.connect(node); node.connect(mute); mute.connect(ctx.destination);
+  listening = true;
+  $('listen').textContent = 'Stop listening';
+  show('msg', '');
+  await listDevices();
+  const label = stream.getAudioTracks()[0]?.label || '';
+  $('btWarn').hidden = !/airpods|bluetooth|hands-free|headset/i.test(label);
+  $('rateInfo').textContent = `Recording at ${(ctx.sampleRate / 1000).toFixed(1)} kHz from ${label || 'your microphone'}.`;
+  return true;
+}
+
+async function stopListening() {
+  if (rec && !rec.done) finishRecording();
+  stream?.getTracks().forEach(t => t.stop());
+  if (ctx) { try { await ctx.close(); } catch (e) {} }
+  ctx = stream = source = node = null;
+  listening = false;
+  $('listen').textContent = 'Start listening';
+  $('fill').style.clipPath = 'inset(0 100% 0 0)'; $('peakMark').style.opacity = 0;
+  show('live', '');
+}
+
+async function listDevices() {
+  const devices = (await navigator.mediaDevices.enumerateDevices()).filter(d => d.kind === 'audioinput');
+  const current = $('device').value || stream?.getAudioTracks()[0]?.getSettings().deviceId || '';
+  $('device').innerHTML = '';
+  devices.forEach((d, i) => {
+    const o = document.createElement('option');
+    o.value = d.deviceId; o.textContent = d.label || `Microphone ${i + 1}`;
+    $('device').appendChild(o);
+  });
+  if (!devices.length) $('device').innerHTML = '<option value="">No microphone found</option>';
+  if ([...$('device').options].some(o => o.value === current)) $('device').value = current;
+}
+
+$('listen').onclick = () => listening ? stopListening() : startListening();
+$('device').onchange = () => { if (listening && !(rec && !rec.done)) startListening(); };
+
+// ---- Meter --------------------------------------------------------------
+const frac = db => Math.max(0, Math.min(1, (db + 60) / 60));
+setInterval(() => {
+  if (!listening) return;
+  const rms = winCount ? Math.sqrt(winSum / winCount) : 0, peak = winPeak;
+  winPeak = winSum = winCount = 0;
+  const avgDB = DB(rms), pkDB = DB(peak);
+  shownPeak = Math.max(pkDB, shownPeak - 1.5);
+  $('fill').style.clipPath = `inset(0 ${(1 - frac(avgDB)) * 100}% 0 0)`;
+  $('peakMark').style.left = `calc(${frac(shownPeak) * 100}% - 2px)`;
+  $('peakMark').style.opacity = shownPeak > -60 ? 1 : 0;
+  if (pkDB > -1) clipUntil = Date.now() + 1500;
+  if (Date.now() < clipUntil) show('live', 'Too loud — clipping. Lower Boost or move back.');
+  else if (shownPeak < -45) show('live', 'Listening… speak now.', true);
+  else if (shownPeak < -24) show('live', 'A bit quiet — press Auto-set level, or raise Boost until your loudest words reach the yellow zone.');
+  else show('live', 'Signal looks healthy.', true);
+  if (auto) {
+    auto.peak = Math.max(auto.peak, peak / LIN(boostDB));
+    if (Date.now() >= auto.end) finishAuto();
+  }
+  if (rec && !rec.done) {
+    const t = (Date.now() - rec.start) / 1000;
+    $(rec.timeEl).textContent = rec.timeText(t);
+    if (t >= rec.max) finishRecording();
+  }
+}, 50);
+
+// ---- Auto level ---------------------------------------------------------
+$('auto').onclick = async () => {
+  if (!listening && !(await startListening())) return;
+  auto = { end: Date.now() + 4000, peak: 0 };
+  $('auto').disabled = true; $('auto').textContent = 'Listening… read aloud';
+  show('msg', 'Read aloud now in your normal voice… (4 seconds)', true);
+};
+function finishAuto() {
+  const raw = auto.peak; auto = null;
+  $('auto').disabled = false; $('auto').textContent = '✨ Auto-set level';
+  if (raw < 0.0005) { show('msg', 'I didn’t hear any speech. Check the right microphone is selected, then try again.'); return; }
+  const needed = DB(0.5 / raw);  // target peak −6 dB
+  setBoost(needed);
+  if (needed < -2) { show('msg', 'Your mic is too loud even with no Boost. Lower its input volume in your computer’s Sound settings (Input), or move a little further back, then try again.'); return; }
+  show('msg', needed > 40
+    ? 'Boost is at the maximum (+40 dB) but it’s still quiet. Your mic may be muted, on the wrong input, or turned down in your computer’s sound settings.'
+    : `Level set — Boost +${boostDB} dB. Speak at this distance when you record.`, needed <= 40);
+}
+
+// ---- Recording ----------------------------------------------------------
+async function startRecording(opts) {
+  if (!listening && !(await startListening())) return;
+  rec = { chunks: [], peak: 0, start: Date.now(), done: false, rate: ctx.sampleRate, ...opts };
+  opts.onStart();
+}
+function finishRecording() {
+  if (!rec || rec.done) return;
+  rec.done = true;
+  const r = rec, total = r.chunks.reduce((n, c) => n + c.length, 0);
+  const samples = new Float32Array(total);
+  let o = 0; for (const c of r.chunks) { samples.set(c, o); o += c.length; }
+  r.onDone(samples, r.rate, DB(r.peak));
+}
+
+function timeText(t) { const s = Math.floor(t); return `${Math.floor(s / 60)}:${String(s % 60).padStart(2, '0')}`; }
+
+$('testBtn').onclick = () => startRecording({
+  max: 5, timeEl: 'testTime', timeText: t => `${timeText(t)} / 0:05`,
+  onStart() { $('testBtn').disabled = true; show('testVerdict', ''); $('testAudio').hidden = true; },
+  onDone(samples, rate, peakDB) {
+    $('testBtn').disabled = false; $('testTime').textContent = '';
+    if (samples.length < rate * 0.5) { show('testVerdict', 'Nothing was recorded. Check the microphone and try again.'); return; }
+    const [text, good] = verdict(peakDB);
+    show('testVerdict', `${text} (Loudest moment: ${peakDB.toFixed(1)} dB)`, good);
+    normalize(samples);
+    play('testAudio', samples, rate);
+  }
+});
+
+$('recBtn').onclick = () => {
+  if (!$('script').value.trim()) { show('recVerdict', 'Enter the script you will read first.'); return; }
+  startRecording({
+    max: 30, timeEl: 'recTime', timeText: t => `${timeText(t)} / 0:30`,
+    onStart() {
+      $('recBtn').disabled = true; $('stopBtn').disabled = false; $('testBtn').disabled = true;
+      show('recVerdict', 'Recording… read the script now. Press Stop when you finish.', true);
+      $('recAudio').hidden = true; $('recActions').hidden = true;
+    },
+    onDone(samples, rate, peakDB) {
+      $('recBtn').disabled = false; $('stopBtn').disabled = true; $('testBtn').disabled = false;
+      const secs = samples.length / rate;
+      $('recTime').textContent = `${timeText(secs)} / 0:30`;
+      if (secs < 3) { show('recVerdict', 'That was under 3 seconds. Record again and read the whole script.'); return; }
+      const [text, good] = verdict(peakDB);
+      show('recVerdict', `Recorded ${secs.toFixed(1)} seconds. ${text}`, good);
+      const final = $('clean').checked ? cleanUp(samples, rate) : samples;
+      const wav = play('recAudio', final, rate);
+      $('dlWav').href = wav; $('dlWav').download = 'ether-voice-sample.wav';
+      if (urls.txt) URL.revokeObjectURL(urls.txt);
+      urls.txt = URL.createObjectURL(new Blob([$('script').value.trim() + '\n'], { type: 'text/plain' }));
+      $('dlTxt').href = urls.txt; $('dlTxt').download = 'ether-voice-transcript.txt';
+      $('recActions').hidden = false;
+    }
+  });
+};
+$('stopBtn').onclick = finishRecording;
+
+function play(id, samples, rate) {
+  if (urls[id]) URL.revokeObjectURL(urls[id]);
+  urls[id] = URL.createObjectURL(encodeWAV(samples, rate));
+  $(id).src = urls[id]; $(id).hidden = false; $(id).play().catch(() => {});
+  return urls[id];
+}
+
+// ---- Audio processing (same algorithm as the Mac app) ---------------------
+function normalize(y) {
+  let peak = 0; for (let i = 0; i < y.length; i++) peak = Math.max(peak, Math.abs(y[i]));
+  if (peak <= 0) return;
+  const g = Math.min(0.708 / peak, 31.6);
+  for (let i = 0; i < y.length; i++) y[i] *= g;
+}
+function cleanUp(x, rate) {
+  const n = x.length, y = new Float32Array(n);
+  let mean = 0; for (let i = 0; i < n; i++) mean += x[i]; mean /= n;
+  const rc = 1 / (2 * Math.PI * 80), a = rc / (rc + 1 / rate);
+  let pi = 0, po = 0;
+  for (let i = 0; i < n; i++) { const xi = x[i] - mean, o = a * (po + xi - pi); pi = xi; po = o; y[i] = o; }
+  const frame = Math.max(1, Math.floor(rate * 0.02)), frames = Math.ceil(n / frame);
+  const rms = new Float32Array(frames);
+  for (let f = 0; f < frames; f++) {
+    const s = f * frame, e = Math.min(n, s + frame); let sum = 0;
+    for (let i = s; i < e; i++) sum += y[i] * y[i];
+    rms[f] = Math.sqrt(sum / (e - s));
+  }
+  const sorted = Float32Array.from(rms).sort();
+  const floor = Math.max(sorted[Math.floor(frames / 10)], 1e-6), closed = floor * 1.5, open = floor * 4, fg = 0.18;
+  const target = new Float32Array(frames);
+  for (let f = 0; f < frames; f++) {
+    const r = rms[f];
+    target[f] = r >= open ? 1 : r <= closed ? fg : fg + (1 - fg) * (r - closed) / (open - closed);
+  }
+  const held = Float32Array.from(target);
+  for (let f = 0; f < frames; f++) if (target[f] >= 0.999)
+    for (let k = Math.max(0, f - 2); k <= Math.min(frames - 1, f + 6); k++) held[k] = 1;
+  const gains = new Float32Array(frames); let g = held[0];
+  for (let f = 0; f < frames; f++) { const t = held[f]; g = t > g ? t : g + (t - g) * 0.4; gains[f] = g; }
+  for (let i = 0; i < n; i++) {
+    const p = i / frame - 0.5, f0 = Math.max(0, Math.min(frames - 1, Math.floor(p))), f1 = Math.min(frames - 1, f0 + 1);
+    const t = Math.max(0, Math.min(1, p - f0));
+    y[i] *= gains[f0] * (1 - t) + gains[f1] * t;
+  }
+  normalize(y);
+  const fade = Math.min(n >> 1, Math.floor(rate * 0.01));
+  for (let i = 0; i < fade; i++) { const k = i / fade; y[i] *= k; y[n - 1 - i] *= k; }
+  return y;
+}
+function encodeWAV(samples, rate) {
+  const buf = new ArrayBuffer(44 + samples.length * 2), v = new DataView(buf);
+  const str = (o, s) => { for (let i = 0; i < s.length; i++) v.setUint8(o + i, s.charCodeAt(i)); };
+  str(0, 'RIFF'); v.setUint32(4, 36 + samples.length * 2, true); str(8, 'WAVE'); str(12, 'fmt ');
+  v.setUint32(16, 16, true); v.setUint16(20, 1, true); v.setUint16(22, 1, true);
+  v.setUint32(24, rate, true); v.setUint32(28, rate * 2, true); v.setUint16(32, 2, true); v.setUint16(34, 16, true);
+  str(36, 'data'); v.setUint32(40, samples.length * 2, true);
+  for (let i = 0; i < samples.length; i++) {
+    const s = Math.max(-1, Math.min(1, samples[i]));
+    v.setInt16(44 + i * 2, s < 0 ? s * 0x8000 : s * 0x7FFF, true);
+  }
+  return new Blob([buf], { type: 'audio/wav' });
+}
+window.addEventListener('beforeunload', () => stream?.getTracks().forEach(t => t.stop()));
+</script>
+</body>
+</html>

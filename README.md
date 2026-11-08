@@ -4,6 +4,10 @@
 
 A personal reader for pasted passages and plain-text files, with browser narration, sentence navigation, bookmarks, spoken controls, and voice-sample recording.
 
+## Voice Studio (public page)
+
+`voice.html` is a browser mic test and voice recorder. It has a mic picker, a live meter, Auto-set level, Boost, a 5-second test, clean-up (rumble/hiss/level) and a WAV + transcript download. Audio never leaves the device.
+
 ## Use
 
 Open index.html in a supported browser, or publish the main branch root with GitHub Pages. Paste a passage and click Prepare reading, then Read. The source link opens The Secret Book of John.
