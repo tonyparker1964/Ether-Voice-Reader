@@ -1,0 +1,19 @@
+# Ether Voice Reader
+
+A personal reader for pasted passages and plain-text files, with browser narration, sentence navigation, bookmarks, spoken controls, and voice-sample recording.
+
+## Use
+
+Open index.html in a supported browser, or publish the main branch root with GitHub Pages. Paste a passage and click Prepare reading, then Read. The source link opens The Secret Book of John.
+
+Voice controls: enable the microphone and say “reader play”, “reader pause”, “reader next”, “reader back”, “reader stop”, “reader faster”, or “reader slower”. Browser support varies; Chrome is suggested. Headphones reduce accidental commands from narration.
+
+## Your voice
+
+Recording, playback, and sample download are implemented. Voice cloning and narration generated in your own voice are not connected yet and require a voice service. No personal recordings or credentials are included in this repository.
+
+Reading text and bookmarks are stored in this browser. Voice samples remain temporary until downloaded. Speech recognition may use the browser provider's online service.
+
+## Validation
+
+JavaScript syntax checked. Microphone permissions, speech recognition, and audio playback still require testing in the user's browser.
