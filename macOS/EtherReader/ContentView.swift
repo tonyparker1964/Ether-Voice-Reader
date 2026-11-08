@@ -182,6 +182,37 @@ struct MicPicker: View {
     }
 }
 
+/// Hardware mic volume (when the mic supports it) and a software Boost.
+struct MicVolumeControls: View {
+    @ObservedObject var mic: MicManager
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 8) {
+            if let volume = mic.hardwareVolume {
+                HStack {
+                    Text("Mic volume").frame(width: 90, alignment: .leading)
+                    Slider(value: Binding(get: { volume }, set: { mic.setHardwareVolume($0) }), in: 0...1)
+                    Text("\(Int((volume * 100).rounded()))%").monospacedDigit().frame(width: 48, alignment: .trailing)
+                }
+            } else if mic.listening {
+                Text("This mic's own volume can't be set from here — use the knob on the mic, or Boost below.")
+                    .font(.caption).foregroundStyle(.secondary)
+            }
+            HStack {
+                Text("Boost").frame(width: 90, alignment: .leading)
+                Slider(value: $mic.softwareGainDB, in: 0...24, step: 1)
+                Text("+\(Int(mic.softwareGainDB)) dB").monospacedDigit().frame(width: 48, alignment: .trailing)
+            }
+            Text("Raise Mic volume first; use Boost only if it's still too quiet. Aim for your loudest words to reach the yellow zone, never red.")
+                .font(.caption).foregroundStyle(.secondary)
+            if mic.sampleRate > 0 {
+                Text(String(format: "Recording at %.1f kHz", mic.sampleRate / 1000))
+                    .font(.caption2).foregroundStyle(.secondary)
+            }
+        }
+    }
+}
+
 struct PlayerControls: View {
     @ObservedObject var player: Player
 

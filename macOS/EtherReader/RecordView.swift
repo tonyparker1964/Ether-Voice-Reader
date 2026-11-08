@@ -7,13 +7,14 @@ struct RecordView: View {
     @StateObject private var savedPlayer = Player()
     @AppStorage("recordScript") private var script =
         "The morning light moved slowly across the water. I opened the old book, took a breath, and began to read the story aloud, one quiet word at a time."
+    @AppStorage("cleanUpRecording") private var cleanUp = true
     @State private var take: URL?
     @State private var takeSeconds: Double = 0
     @State private var takePeak: Float = -160
     @State private var note = ""
     @State private var transcriptDraft = ""
 
-    private let takeURL = FileManager.default.temporaryDirectory.appendingPathComponent("ether-voice-take.caf")
+    private let takeURL = FileManager.default.temporaryDirectory.appendingPathComponent("ether-voice-take.wav")
     private let maxSeconds = 30.0
 
     var body: some View {
@@ -31,6 +32,8 @@ struct RecordView: View {
             Card(title: "Record") {
                 MicPicker(mic: mic)
                 LevelMeter(averageDB: mic.averageDB, peakDB: mic.peakDB)
+                MicVolumeControls(mic: mic)
+                Toggle("Clean up recording — remove rumble, lower hiss between words, even out the volume", isOn: $cleanUp)
                 if mic.clipping { Notice(text: "Too loud — clipping. Lower the input volume or move back.") }
                 if mic.selectedIsBluetooth {
                     Notice(text: "Bluetooth mic selected — expect lower quality. A USB or wired mic is better for your voice sample.")
@@ -102,7 +105,7 @@ struct RecordView: View {
         takePlayer.unload()
         take = nil
         note = ""
-        mic.record(to: takeURL, maxSeconds: maxSeconds) { url, error in
+        mic.record(to: takeURL, maxSeconds: maxSeconds, cleanUp: cleanUp) { url, error in
             guard let url else {
                 note = error ?? "Recording failed."
                 return

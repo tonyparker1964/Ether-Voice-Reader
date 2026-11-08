@@ -51,7 +51,7 @@ final class VoiceEngine: ObservableObject {
     var python: URL { venv.appendingPathComponent("bin/python") }
     var modelCache: URL { root.appendingPathComponent("model-cache") }
     var voiceDir: URL { root.appendingPathComponent("voice") }
-    var sampleURL: URL { voiceDir.appendingPathComponent("reference.caf") }
+    var sampleURL: URL { voiceDir.appendingPathComponent("reference.wav") }
     var transcriptURL: URL { voiceDir.appendingPathComponent("transcript.txt") }
     var narrationDir: URL { root.appendingPathComponent("narrations") }
     var marker: URL { venv.appendingPathComponent("ether-installed.txt") }

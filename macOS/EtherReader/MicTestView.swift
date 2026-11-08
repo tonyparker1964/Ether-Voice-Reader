@@ -7,7 +7,7 @@ struct MicTestView: View {
     @State private var testPeak: Float?
     @State private var testing = false
 
-    private let testURL = FileManager.default.temporaryDirectory.appendingPathComponent("ether-mic-test.caf")
+    private let testURL = FileManager.default.temporaryDirectory.appendingPathComponent("ether-mic-test.wav")
 
     var body: some View {
         Screen(title: "Mic Test",
@@ -15,6 +15,7 @@ struct MicTestView: View {
             Card(title: "1 · Choose and listen") {
                 MicPicker(mic: mic)
                 LevelMeter(averageDB: mic.averageDB, peakDB: mic.peakDB)
+                MicVolumeControls(mic: mic)
                 if mic.listening {
                     liveAdvice
                 } else {
@@ -39,7 +40,7 @@ struct MicTestView: View {
             }
 
             Card(title: "2 · Record a 5-second test") {
-                Text("Say a sentence or two in your reading voice. It plays back automatically so you can hear exactly what the app hears.")
+                Text("Say a sentence or two in your reading voice. It plays back automatically, unprocessed, so you hear exactly what the mic gives.")
                     .foregroundStyle(Theme.muted)
                 HStack {
                     Button {
@@ -67,6 +68,8 @@ struct MicTestView: View {
             Notice(text: "Too loud — clipping. Lower the input volume or move back.")
         } else if mic.peakDB < -45 {
             Text("Listening… speak now.").foregroundStyle(Theme.muted)
+        } else if mic.peakDB < -24 {
+            Notice(text: "A bit quiet — raise Mic volume (or Boost) until your loudest words reach the yellow zone.")
         } else {
             Notice(text: "Signal looks healthy.", good: true)
         }
