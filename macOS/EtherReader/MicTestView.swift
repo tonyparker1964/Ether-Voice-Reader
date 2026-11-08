@@ -40,7 +40,7 @@ struct MicTestView: View {
             }
 
             Card(title: "2 · Record a 5-second test") {
-                Text("Say a sentence or two in your reading voice. It plays back automatically, unprocessed, so you hear exactly what the mic gives.")
+                Text("Say a sentence or two in your reading voice. It plays back automatically at full loudness so you can hear the quality clearly; the level advice is based on what the mic really gave.")
                     .foregroundStyle(Theme.muted)
                 HStack {
                     Button {
@@ -79,7 +79,7 @@ struct MicTestView: View {
         player.unload()
         testPeak = nil
         testing = true
-        mic.record(to: testURL, maxSeconds: 5) { url, error in
+        mic.record(to: testURL, maxSeconds: 5, normalize: true) { url, error in
             testing = false
             if let url {
                 testPeak = mic.recordPeakDB

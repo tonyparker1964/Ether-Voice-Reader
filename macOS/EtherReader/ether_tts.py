@@ -58,6 +58,29 @@ def split_text(text, limit=450):
     return chunks
 
 
+def loudness(data, rate, target_db=-16.0, ceiling=0.89):
+    """Bring speech to a consistent, comfortable loudness with a soft limiter."""
+    import numpy as np
+    data = np.asarray(data, dtype=np.float32)
+    if data.size == 0:
+        return data
+    frame = max(1, int(rate * 0.05))
+    usable = data[: data.size - data.size % frame] if data.size >= frame else data
+    frames = usable.reshape(-1, frame) if usable.size >= frame else usable.reshape(1, -1)
+    rms = np.sqrt(np.mean(frames ** 2, axis=1))
+    active = rms[rms > max(rms.max() * 0.05, 1e-5)]  # ignore silences
+    if active.size == 0:
+        return data
+    speech_rms = float(np.sqrt(np.mean(active ** 2)))
+    gain = min(10 ** (target_db / 20) / speech_rms, 31.6)  # at most +30 dB
+    out = data * gain
+    knee = ceiling * 0.8
+    mag = np.abs(out)
+    over = mag > knee
+    out[over] = np.sign(out[over]) * (knee + (ceiling - knee) * np.tanh((mag[over] - knee) / (ceiling - knee)))
+    return out
+
+
 def speak(req):
     global model
     import numpy as np
@@ -89,7 +112,7 @@ def speak(req):
                 audio.append(np.zeros(int(rate * 0.3), dtype=np.float32))
         if not audio or rate is None:
             raise RuntimeError('The model produced no audio.')
-        data = np.clip(np.concatenate(audio), -1.0, 1.0)
+        data = np.clip(loudness(np.concatenate(audio), rate), -1.0, 1.0)
         sf.write(req['out'], data, rate, subtype='PCM_16')
     send(event='done', out=req['out'], seconds=round(len(data) / rate, 1), total=len(chunks))
 

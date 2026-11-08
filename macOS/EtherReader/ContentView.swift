@@ -200,11 +200,19 @@ struct MicVolumeControls: View {
             }
             HStack {
                 Text("Boost").frame(width: 90, alignment: .leading)
-                Slider(value: $mic.softwareGainDB, in: 0...24, step: 1)
+                Slider(value: $mic.softwareGainDB, in: 0...40, step: 1)
                 Text("+\(Int(mic.softwareGainDB)) dB").monospacedDigit().frame(width: 48, alignment: .trailing)
             }
-            Text("Raise Mic volume first; use Boost only if it's still too quiet. Aim for your loudest words to reach the yellow zone, never red.")
-                .font(.caption).foregroundStyle(.secondary)
+            HStack {
+                Button {
+                    mic.autoLevel()
+                } label: {
+                    Label(mic.autoLeveling ? "Listening… read aloud" : "Auto-set level", systemImage: "wand.and.stars")
+                }
+                .disabled(mic.autoLeveling || mic.recording)
+                Text("Press, then read aloud for 4 seconds — the app sets the volume for you.")
+                    .font(.caption).foregroundStyle(.secondary)
+            }
             if mic.sampleRate > 0 {
                 Text(String(format: "Recording at %.1f kHz", mic.sampleRate / 1000))
                     .font(.caption2).foregroundStyle(.secondary)

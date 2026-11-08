@@ -20,6 +20,7 @@ final class MicManager: NSObject, ObservableObject {
     /// Hardware input volume of the selected mic (0...1), or nil when the mic has no adjustable volume.
     @Published var hardwareVolume: Float?
     @Published var sampleRate: Double = 0
+    @Published var autoLeveling = false
     @Published var softwareGainDB: Float = 0 {
         didSet {
             UserDefaults.standard.set(softwareGainDB, forKey: "softwareGainDB")
@@ -39,6 +40,9 @@ final class MicManager: NSObject, ObservableObject {
     private var finish: ((URL?, String?) -> Void)?
     private var clipUntil = Date.distantPast
     private var configObserver: NSObjectProtocol?
+    private var normalize = false
+    private var autoLevelEnd = Date.distantPast
+    private var autoLevelPeak: Float = 0
 
     override init() {
         super.init()
@@ -204,6 +208,10 @@ final class MicManager: NSObject, ObservableObject {
         peakDB = max(peak, peakDB - 1.5)
         if peak > -1 { clipUntil = Date().addingTimeInterval(1.5) }
         clipping = Date() < clipUntil
+        if autoLeveling {
+            autoLevelPeak = max(autoLevelPeak, meter.peak)
+            if Date() >= autoLevelEnd { finishAutoLevel() }
+        }
         if recording, let startedAt {
             elapsed = Date().timeIntervalSince(startedAt)
             recordPeakDB = MicManager.db(state.recordPeak())
@@ -211,11 +219,50 @@ final class MicManager: NSObject, ObservableObject {
         }
     }
 
+    // MARK: Auto level
+
+    /// Listens for 4 seconds while the user reads, then sets Mic volume / Boost so speech peaks near −6 dB.
+    func autoLevel() {
+        guard !recording, !autoLeveling else { return }
+        withPermission { [weak self] in
+            guard let self else { return }
+            if !self.listening { self.startEngine() }
+            guard self.listening else { return }
+            if self.hardwareVolume != nil { self.setHardwareVolume(1) }
+            self.autoLevelPeak = 0
+            self.autoLevelEnd = Date().addingTimeInterval(4)
+            self.autoLeveling = true
+            self.message = "Read aloud now in your normal voice… (4 seconds)"
+        }
+    }
+
+    private func finishAutoLevel() {
+        autoLeveling = false
+        let gain = MicManager.linear(softwareGainDB)
+        let raw = autoLevelPeak / max(gain, 0.0001)  // peak before Boost
+        guard raw > 0.0005 else {
+            message = "I didn't hear any speech. Check the right microphone is selected, then try again."
+            return
+        }
+        let neededDB = MicManager.db(0.5 / raw)  // target peak −6 dB
+        if neededDB >= 0 {
+            softwareGainDB = min(40, neededDB.rounded())
+        } else {
+            softwareGainDB = 0
+            if let volume = hardwareVolume { setHardwareVolume(max(0.05, volume * MicManager.linear(neededDB))) }
+        }
+        if neededDB > 40 {
+            message = "Level set to the maximum (+40 dB) but it's still quiet. This mic may be muted, on the wrong input, or very far away."
+        } else {
+            message = String(format: "Level set — Boost +%.0f dB. Speak at this distance when you record.", softwareGainDB)
+        }
+    }
+
     // MARK: Recording
 
     /// Records the selected mic (with Boost) to a 24-bit WAV at `url`.
     /// With `cleanUp`, removes rumble, lowers hiss between words and evens out the level.
-    func record(to url: URL, maxSeconds: Double, cleanUp: Bool = false,
+    func record(to url: URL, maxSeconds: Double, cleanUp: Bool = false, normalize: Bool = false,
                 completion: @escaping (URL?, String?) -> Void) {
         guard !recording else { return }
         withPermission { [weak self] in
@@ -227,6 +274,7 @@ final class MicManager: NSObject, ObservableObject {
             }
             self.outputURL = url
             self.cleanUp = cleanUp
+            self.normalize = normalize
             self.finish = completion
             self.maxSeconds = maxSeconds
             self.store.reset(capacity: Int(self.sampleRate * maxSeconds) + 4096)
@@ -248,18 +296,21 @@ final class MicManager: NSObject, ObservableObject {
         let rate = sampleRate
         let url = outputURL
         let clean = cleanUp
+        let level = normalize
         let callback = finish
         finish = nil
         DispatchQueue.global(qos: .userInitiated).async {
-            let result = MicManager.writeRecording(samples, rate: rate, to: url, cleanUp: clean)
+            let result = MicManager.writeRecording(samples, rate: rate, to: url, cleanUp: clean, normalize: level)
             DispatchQueue.main.async { callback?(result.url, result.error) }
         }
     }
 
-    static func writeRecording(_ raw: [Float], rate: Double, to url: URL?, cleanUp: Bool) -> (url: URL?, error: String?) {
+    static func writeRecording(_ raw: [Float], rate: Double, to url: URL?, cleanUp: Bool,
+                               normalize: Bool = false) -> (url: URL?, error: String?) {
         guard let url else { return (nil, "No file to record to.") }
         guard rate > 0, raw.count > Int(rate * 0.2) else { return (nil, "Nothing was recorded.") }
-        let samples = cleanUp ? AudioCleanup.process(raw, rate: rate) : raw
+        var samples = cleanUp ? AudioCleanup.process(raw, rate: rate) : raw
+        if normalize && !cleanUp { AudioCleanup.normalize(&samples) }
         try? FileManager.default.removeItem(at: url)
         let settings: [String: Any] = [
             AVFormatIDKey: kAudioFormatLinearPCM,
@@ -351,7 +402,7 @@ final class MicManager: NSObject, ObservableObject {
             return ("Too loud — the sound is clipping, which causes distortion and crackle. Turn Mic volume or Boost down, or move back a little.", false)
         }
         if peakDB < -24 {
-            return ("Too quiet — quiet recordings get hissy when they're turned up. Raise Mic volume first, then Boost, until your loudest words reach the yellow zone.", false)
+            return ("Too quiet — press Auto-set level and read aloud, or raise Mic volume / Boost until your loudest words reach the yellow zone.", false)
         }
         return ("Good level. This microphone is ready for recording.", true)
     }
@@ -525,11 +576,7 @@ enum AudioCleanup {
         }
 
         // 3. Normalise the loudest moment to −3 dBFS (at most +30 dB).
-        let peak = y.reduce(Float(0)) { max($0, abs($1)) }
-        if peak > 0 {
-            let gain = min(Float(0.708) / peak, Float(31.6))
-            for i in 0..<n { y[i] *= gain }
-        }
+        normalize(&y)
 
         // 4. Short fades so the file starts and ends without a click.
         let fade = min(n / 2, Int(rate * 0.01))
@@ -541,5 +588,13 @@ enum AudioCleanup {
             }
         }
         return y
+    }
+
+    /// Scales so the loudest sample sits at −3 dBFS (at most +30 dB).
+    static func normalize(_ y: inout [Float]) {
+        let peak = y.reduce(Float(0)) { max($0, abs($1)) }
+        guard peak > 0 else { return }
+        let gain = min(Float(0.708) / peak, Float(31.6))
+        for i in y.indices { y[i] *= gain }
     }
 }
