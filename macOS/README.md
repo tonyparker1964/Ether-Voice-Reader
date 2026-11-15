@@ -11,7 +11,7 @@ A native macOS app that reads your words in your own voice. Voice generation run
 - **Record Voice**: read a script (editable), record up to 30 seconds, play it back,
   then press **Use this recording as my voice**. The script becomes the transcript automatically.
   Recordings are lossless (CAF / PCM). They aren't compressed, which avoids the crackle the browser recorder had.
-- **Narrate**: paste a passage or open a .txt file, then press **Generate in my voice**. Long text is
+- **Narrate**: press **Open book…** to load a whole book (PDF, EPUB, Word .docx/.doc, RTF, OpenDocument, HTML, Markdown or text). It's split into chapters (from the PDF/EPUB table of contents, or headings like "Chapter 4"), and you step through them with the chapter picker; the open book and your chapter are remembered. Or paste a passage. Then press **Generate in my voice**. Long text is
   read in parts and joined together. You can play, pause, stop and seek, then save the narration as WAV.
 - **Voice Engine**: one-button install of the Python voice engine. You can also pick the storage folder.
   The default is the **MAC Mini 2** external drive when it's connected (`/Volumes/MAC Mini 2/Ether Reader`).

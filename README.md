@@ -2,7 +2,7 @@
 
 **New: native Mac app.** See [`macOS/`](macOS/README.md). It's a SwiftUI app with a mic test, lossless voice recording and on-device narration in your voice. The browser versions below are kept for reference.
 
-A personal reader for pasted passages and plain-text files, with browser narration, sentence navigation, bookmarks, spoken controls, and voice-sample recording.
+A personal reader for whole books (PDF, EPUB, Word .docx, HTML, Markdown, plain text) and pasted passages, with chapter navigation, with browser narration, sentence navigation, bookmarks, spoken controls, and voice-sample recording.
 
 ## Voice Studio (public page)
 
@@ -10,9 +10,9 @@ A personal reader for pasted passages and plain-text files, with browser narrati
 
 ## Use
 
-Open index.html in a supported browser, or publish the main branch root with GitHub Pages. Paste a passage and click Prepare reading, then Read. The source link opens The Secret Book of John.
+Open index.html in a supported browser, or publish the main branch root with GitHub Pages. Click **Open book…** to load a whole book (it's split into chapters you can step through, and reading can continue into the next chapter automatically), or paste a passage and click Prepare reading. Then press Read. PDFs are read with Mozilla's pdf.js, loaded only when you open a PDF.
 
-Voice controls: enable the microphone and say “reader play”, “reader pause”, “reader next”, “reader back”, “reader stop”, “reader faster”, or “reader slower”. Browser support varies; Chrome is suggested. Headphones reduce accidental commands from narration.
+Voice controls: enable the microphone and say “reader play”, “reader pause”, “reader next”, “reader back”, “reader stop”, “reader faster”, “reader slower”, “reader next chapter” or “reader previous chapter”. Browser support varies; Chrome is suggested. Headphones reduce accidental commands from narration.
 
 ## Your voice
 

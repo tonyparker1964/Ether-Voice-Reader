@@ -1,6 +1,219 @@
-<!doctype html><html lang="en"><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Ether · Voice Reader</title><style>
-[hidden]{display:none!important}:root{color-scheme:dark;--gold:#d6b77b}*{box-sizing:border-box}body{margin:0;background:#101c1b;color:#efece0;font:16px system-ui}header{padding:26px 5%;border-bottom:1px solid #ffffff20;display:flex;justify-content:space-between}.brand{letter-spacing:3px;color:var(--gold)}main{max-width:1250px;margin:auto;padding:55px 30px}.eyebrow{font-size:12px;letter-spacing:3px;color:var(--gold)}h1{font:clamp(38px,5vw,65px) Georgia;margin:15px 0}p{line-height:1.7;color:#b8c6c0}.grid{display:grid;grid-template-columns:1fr 320px;gap:28px;margin-top:35px}.card{border:1px solid #ffffff24;background:#172624;border-radius:18px;padding:25px}h2{font:24px Georgia;margin-top:0}button,select,input{font:inherit}button,.link{display:inline-block;background:#263c36;color:#f6f0df;border:1px solid #ffffff30;border-radius:9px;padding:12px 17px;cursor:pointer;text-decoration:none}button:hover,.link:hover{border-color:var(--gold)}.primary{background:var(--gold);color:#13221c}textarea{width:100%;min-height:310px;resize:vertical;background:#111e1b;color:#eee8d9;border:1px solid #ffffff20;border-radius:10px;padding:20px;font:20px/1.8 Georgia}select{width:100%;padding:10px;background:#101c1b;color:white;border-radius:7px}label{display:block;margin:18px 0 8px;color:#ced8ce}.row{display:flex;gap:9px;flex-wrap:wrap;margin:16px 0}small{color:#b8c6c0;line-height:1.6}#readout{font:25px/1.8 Georgia;white-space:pre-wrap;margin:25px 0;max-height:350px;overflow:auto}mark{background:#d6b77b;color:#101c1b}#status{min-height:27px;color:var(--gold)}audio{width:100%;margin:15px 0}input[type=range]{width:100%;accent-color:var(--gold)}footer{margin-top:25px;color:#94a69d;font-size:13px}.badge{font-size:12px;border:1px solid #d6b77b60;border-radius:30px;padding:7px 11px;color:var(--gold)}@media(max-width:800px){.grid{grid-template-columns:1fr}main{padding:30px 18px}header{padding:20px}}
-</style><header><span class="brand">ETHER / READER</span><span><a href="voice.html" style="color:#d6b77b;text-decoration:none;margin-right:16px">Voice Studio →</a><span class="badge">YOUR PERSONAL READING SPACE</span></span></header><main><div class="eyebrow">READ · LISTEN · REFLECT</div><h1>Let the words find their voice.</h1><p>A quiet space for The Secret Book of John—and the texts you choose to explore.</p><div class="grid"><section class="card"><div class="eyebrow">CURRENT SOURCE</div><h2>The Secret Book of John</h2><p>Long version · translated by Michael Waldstein & Frederik Wisse</p><a class="link" target="_blank" rel="noopener" href="https://www.gnosis.org/naghamm/apocjn-long.html">Open source ↗</a><p>Copy a passage from the source, then paste it below. Your reading text and position are saved in this browser.</p><textarea id="text" aria-label="Text to read" placeholder="Paste a passage here…"></textarea><div class="row"><button id="load" class="primary">Prepare reading</button><label class="link" style="margin:0;cursor:pointer">Import .txt<input type="file" id="import" accept=".txt,text/plain" hidden></label><button id="clear">Clear</button></div><div id="readout" aria-label="Reading passage"></div><div class="row"><button id="prev" aria-label="Previous sentence">← Back</button><button id="play" class="primary">▶ Read</button><button id="pause">Pause</button><button id="stop">Stop</button><button id="next">Next →</button><button id="bookmark">Bookmark</button><button id="restore">Return to bookmark</button></div><div id="status" role="status" aria-live="polite">Paste a passage to begin.</div><small id="progress"></small></section><aside><section class="card"><h2>Your listening settings</h2><label for="voices">Device narration voice</label><select id="voices"></select><label for="rate">Reading speed <span id="speed">1.0×</span></label><input id="rate" type="range" min="0.5" max="1.5" step="0.1" value="1"><label for="size">Text size</label><input id="size" type="range" min="18" max="36" value="25"><hr style="border:0;border-top:1px solid #ffffff20;margin:25px 0"><h2>Speak your commands</h2><button id="listen">Enable voice controls</button><p><small>Say “reader play,” “reader pause,” “reader next,” “reader back,” “reader stop,” “reader faster,” or “reader slower.” Headphones help prevent narration from triggering commands. Your browser may process speech online.</small></p><small id="mic">Microphone off</small></section><section class="card" style="margin-top:20px"><h2>Your own voice</h2><p>Test your microphone, set the level automatically and record a clean voice sample (WAV) in the Voice Studio.</p><a class="link primary" href="voice.html" style="background:var(--gold);color:#13221c">🎙 Open Voice Studio</a><p><small>Narration in your own voice runs in the Ether Reader Mac app.</small></p></section></aside></div><footer>One passage. One breath. Your own pace.</footer></main><script>const $=id=>document.getElementById(id),synth=window.speechSynthesis;let sentences=[],index=0,playing=false,epoch=0,recorder,stream,blobURL,recognition,listening=false;const status=t=>$('status').textContent=t;function save(){try{localStorage.setItem('ether-reading',JSON.stringify({text:$('text').value,index,rate:$('rate').value}))}catch{status('Browser storage is unavailable. Keep a copy of your text.')}}function render(){const box=$('readout');box.replaceChildren();sentences.forEach((s,i)=>{const span=document.createElement(i===index?'mark':'span');span.textContent=s+' ';box.append(span)});box.querySelector('mark')?.scrollIntoView({block:'nearest',behavior:'smooth'});$('progress').textContent=sentences.length?`Sentence ${index+1} of ${sentences.length}`:'';save()}function stop(){epoch++;playing=false;synth?.cancel()}function prepare(){stop();sentences=$('text').value.trim().match(/[^.!?]+[.!?]+(?:[”’"']|$)?|[^.!?]+$/g)||[];sentences=sentences.map(s=>s.trim()).filter(Boolean);index=0;render();status(sentences.length?'Ready to read.':'Paste a passage to begin.')}function speak(){if(!synth){status('Device narration is unavailable in this browser.');return}if(!sentences.length){prepare();if(!sentences.length)return}stop();playing=true;const current=epoch;function run(){if(!playing||current!==epoch)return;render();const u=new SpeechSynthesisUtterance(sentences[index]);u.rate=Number($('rate').value);u.voice=synth.getVoices().find(v=>v.voiceURI===$('voices').value)||null;u.onend=()=>{if(current!==epoch||!playing)return;if(index<sentences.length-1){index++;run()}else{playing=false;status('Reading complete.')}};u.onerror=e=>{if(current===epoch&&e.error!=='canceled'&&e.error!=='interrupted'){playing=false;status('Narration could not play: '+e.error)}};synth.speak(u);status('Reading aloud.')}run()}function move(n){const active=playing;stop();index=Math.max(0,Math.min(sentences.length-1,index+n));render();if(active)speak()}$('load').onclick=prepare;$('play').onclick=()=>{if(synth?.paused&&playing){synth.resume();status('Reading aloud.')}else speak()};$('pause').onclick=()=>{synth?.pause();status('Paused. Press Read to continue.')};$('stop').onclick=()=>{stop();status('Stopped.')};$('next').onclick=()=>move(1);$('prev').onclick=()=>move(-1);$('rate').oninput=()=>{$('speed').textContent=Number($('rate').value).toFixed(1)+'×';save()};$('size').oninput=()=>$('readout').style.fontSize=$('size').value+'px';$('clear').onclick=()=>{stop();$('text').value='';prepare()};$('text').onchange=prepare;$('import').onchange=async e=>{const f=e.target.files[0];if(f){$('text').value=await f.text();prepare()}};$('bookmark').onclick=()=>{try{localStorage.setItem('ether-bookmark',JSON.stringify({text:$('text').value,index}));status('Bookmark saved.')}catch{status('Bookmark could not be saved.')}};$('restore').onclick=()=>{try{const b=JSON.parse(localStorage.getItem('ether-bookmark'));if(!b){status('No bookmark saved yet.');return}$('text').value=b.text;prepare();index=Math.min(b.index,sentences.length-1);render();status('Bookmark restored.')}catch{status('Bookmark could not be restored.')}};function voices(){const old=$('voices').value;$('voices').replaceChildren();(synth?.getVoices()||[]).forEach(v=>{const o=document.createElement('option');o.value=v.voiceURI;o.textContent=v.name+' · '+v.lang;$('voices').append(o)});if(old)$('voices').value=old}voices();if(synth)synth.onvoiceschanged=voices;try{const saved=JSON.parse(localStorage.getItem('ether-reading'));if(saved){$('text').value=saved.text;$('rate').value=saved.rate||1;prepare();index=Math.max(0,Math.min(saved.index||0,sentences.length-1));render();$('rate').oninput()}}catch{}
-const SR=window.SpeechRecognition||window.webkitSpeechRecognition;$('listen').onclick=()=>{if(!SR){$('mic').textContent='Speech controls are not supported here. Try Chrome; buttons remain available.';return}if(listening){listening=false;recognition?.stop();$('listen').textContent='Enable voice controls';return}recognition=new SR();recognition.continuous=true;recognition.lang='en-US';recognition.onresult=e=>{for(let n=e.resultIndex;n<e.results.length;n++){if(!e.results[n].isFinal)continue;const command=e.results[n][0].transcript.toLowerCase().trim();$('mic').textContent='Heard: '+command;if(!command.includes('reader'))continue;if(/pause/.test(command))$('pause').click();else if(/stop/.test(command))$('stop').click();else if(/next/.test(command))move(1);else if(/back|previous/.test(command))move(-1);else if(/play|read|resume/.test(command))$('play').click();else if(/faster|slower/.test(command)){const d=command.includes('faster')?.1:-.1;$('rate').value=Math.max(.5,Math.min(1.5,Number($('rate').value)+d));$('rate').oninput()}}};recognition.onerror=e=>{listening=false;$('listen').textContent='Enable voice controls';$('mic').textContent='Microphone: '+e.error};recognition.onend=()=>{listening=false;$('listen').textContent='Enable voice controls'};try{recognition.start();listening=true;$('listen').textContent='Disable voice controls';$('mic').textContent='Listening for “reader…”'}catch(e){$('mic').textContent=e.message}};
-window.addEventListener('beforeunload',()=>{synth?.cancel();stream?.getTracks().forEach(t=>t.stop())});
-</script></html>
+<!doctype html>
+<html lang="en">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Ether · Voice Reader</title>
+<style>
+[hidden]{display:none!important}:root{color-scheme:dark;--gold:#d6b77b}*{box-sizing:border-box}
+body{margin:0;background:#101c1b;color:#efece0;font:16px system-ui}
+header{padding:26px 5%;border-bottom:1px solid #ffffff20;display:flex;justify-content:space-between}
+.brand{letter-spacing:3px;color:var(--gold)}main{max-width:1250px;margin:auto;padding:55px 30px}
+.eyebrow{font-size:12px;letter-spacing:3px;color:var(--gold)}h1{font:clamp(38px,5vw,65px) Georgia;margin:15px 0}
+p{line-height:1.7;color:#b8c6c0}.grid{display:grid;grid-template-columns:1fr 320px;gap:28px;margin-top:35px}
+.card{border:1px solid #ffffff24;background:#172624;border-radius:18px;padding:25px}h2{font:24px Georgia;margin-top:0}
+button,select,input{font:inherit}
+button,.link{display:inline-block;background:#263c36;color:#f6f0df;border:1px solid #ffffff30;border-radius:9px;padding:12px 17px;cursor:pointer;text-decoration:none}
+button:hover,.link:hover{border-color:var(--gold)}button:disabled{opacity:.45;cursor:default;border-color:#ffffff30}
+.primary{background:var(--gold);color:#13221c}
+textarea{width:100%;min-height:310px;resize:vertical;background:#111e1b;color:#eee8d9;border:1px solid #ffffff20;border-radius:10px;padding:20px;font:20px/1.8 Georgia}
+select{width:100%;padding:10px;background:#101c1b;color:white;border-radius:7px}
+label{display:block;margin:18px 0 8px;color:#ced8ce}.row{display:flex;gap:9px;flex-wrap:wrap;margin:16px 0;align-items:center}
+small{color:#b8c6c0;line-height:1.6}#readout{font:25px/1.8 Georgia;white-space:pre-wrap;margin:25px 0;max-height:350px;overflow:auto}
+mark{background:#d6b77b;color:#101c1b}#status{min-height:27px;color:var(--gold)}
+input[type=range]{width:100%;accent-color:var(--gold)}footer{margin-top:25px;color:#94a69d;font-size:13px}
+.badge{font-size:12px;border:1px solid #d6b77b60;border-radius:30px;padding:7px 11px;color:var(--gold)}
+.book{border:1px solid #ffffff1c;border-radius:12px;padding:16px;margin:0 0 18px;background:#13211f}
+.book-title{font:20px Georgia;color:var(--gold);margin:0 0 10px}
+.chapters{display:flex;gap:9px;align-items:center}.chapters select{flex:1;min-width:0}
+.check{display:flex;gap:8px;align-items:center;margin:12px 0 0;color:#ced8ce;font-size:14px}.check input{accent-color:var(--gold)}
+@media(max-width:800px){.grid{grid-template-columns:1fr}main{padding:30px 18px}header{padding:20px}}
+</style>
+<header><span class="brand">ETHER / READER</span><span><a href="voice.html" style="color:#d6b77b;text-decoration:none;margin-right:16px">Voice Studio →</a><span class="badge">YOUR PERSONAL READING SPACE</span></span></header>
+<main>
+<div class="eyebrow">READ · LISTEN · REFLECT</div>
+<h1>Let the words find their voice.</h1>
+<p>A quiet space for the books and texts you choose to explore.</p>
+<div class="grid">
+<section class="card">
+  <div class="eyebrow">YOUR TEXT</div>
+  <h2>Open a book or paste a passage</h2>
+  <p>Open a whole book (PDF, EPUB, Word .docx, HTML, Markdown or plain text) and it's split into chapters, or paste a passage below. Your book, chapter and reading position are saved in this browser.</p>
+  <div class="row">
+    <label class="link primary" style="margin:0;cursor:pointer">📖 Open book…<input type="file" id="import" accept=".pdf,.epub,.docx,.txt,.md,.markdown,.html,.htm,.xhtml,application/pdf,application/epub+zip,text/plain,text/html" hidden></label>
+    <span id="opening" hidden><small>Opening book…</small></span>
+  </div>
+  <div class="book" id="book" hidden>
+    <div class="row" style="margin:0 0 6px;justify-content:space-between"><div class="book-title" id="bookTitle"></div><button id="closeBook">Close book</button></div>
+    <div class="chapters">
+      <button id="prevChapter" aria-label="Previous chapter">‹</button>
+      <select id="chapter" aria-label="Chapter"></select>
+      <button id="nextChapter" aria-label="Next chapter">›</button>
+    </div>
+    <small id="chapterInfo"></small>
+    <label class="check"><input type="checkbox" id="autoNext" checked> Continue to the next chapter when one ends</label>
+  </div>
+  <textarea id="text" aria-label="Text to read" placeholder="Paste a passage here, or open a book above…"></textarea>
+  <div class="row"><button id="load" class="primary">Prepare reading</button><button id="clear">Clear</button></div>
+  <div id="readout" aria-label="Reading passage"></div>
+  <div class="row"><button id="prev" aria-label="Previous sentence">← Back</button><button id="play" class="primary">▶ Read</button><button id="pause">Pause</button><button id="stop">Stop</button><button id="next">Next →</button><button id="bookmark">Bookmark</button><button id="restore">Return to bookmark</button></div>
+  <div id="status" role="status" aria-live="polite">Open a book or paste a passage to begin.</div><small id="progress"></small>
+</section>
+<aside>
+<section class="card"><h2>Your listening settings</h2>
+  <label for="voices">Device narration voice</label><select id="voices"></select>
+  <label for="rate">Reading speed <span id="speed">1.0×</span></label><input id="rate" type="range" min="0.5" max="1.5" step="0.1" value="1">
+  <label for="size">Text size</label><input id="size" type="range" min="18" max="36" value="25">
+  <hr style="border:0;border-top:1px solid #ffffff20;margin:25px 0">
+  <h2>Speak your commands</h2><button id="listen">Enable voice controls</button>
+  <p><small>Say “reader play,” “reader pause,” “reader next,” “reader back,” “reader stop,” “reader faster,” “reader slower,” “reader next chapter” or “reader previous chapter.” Headphones help prevent narration from triggering commands. Your browser may process speech online.</small></p>
+  <small id="mic">Microphone off</small>
+</section>
+<section class="card" style="margin-top:20px"><h2>Your own voice</h2>
+  <p>Test your microphone, set the level automatically and record a clean voice sample (WAV) in the Voice Studio.</p>
+  <a class="link primary" href="voice.html" style="background:var(--gold);color:#13221c">🎙 Open Voice Studio</a>
+  <p><small>Narration in your own voice runs in the Ether Reader Mac app.</small></p>
+</section>
+</aside>
+</div>
+<footer>One passage. One breath. Your own pace.</footer>
+</main>
+<script>
+const $=id=>document.getElementById(id),synth=window.speechSynthesis;
+let sentences=[],index=0,playing=false,epoch=0,recognition,listening=false,book=null;
+const status=t=>$('status').textContent=t;
+
+// ---------- Reading ----------
+function save(){try{localStorage.setItem('ether-reading',JSON.stringify({text:$('text').value,index,rate:$('rate').value}))}catch{status('Browser storage is unavailable. Keep a copy of your text.')}}
+function render(){const box=$('readout');box.replaceChildren();sentences.forEach((s,i)=>{const span=document.createElement(i===index?'mark':'span');span.textContent=s+' ';box.append(span)});box.querySelector('mark')?.scrollIntoView({block:'nearest',behavior:'smooth'});$('progress').textContent=sentences.length?`Sentence ${index+1} of ${sentences.length}`:'';save()}
+function stop(){epoch++;playing=false;synth?.cancel()}
+function prepare(){stop();sentences=$('text').value.trim().match(/[^.!?]+[.!?]+(?:[”’"']|$)?|[^.!?]+$/g)||[];sentences=sentences.map(s=>s.trim()).filter(Boolean);index=0;render();status(sentences.length?'Ready to read.':'Open a book or paste a passage to begin.')}
+function speak(){if(!synth){status('Device narration is unavailable in this browser.');return}if(!sentences.length){prepare();if(!sentences.length)return}stop();playing=true;const current=epoch;
+  function run(){if(!playing||current!==epoch)return;render();const u=new SpeechSynthesisUtterance(sentences[index]);u.rate=Number($('rate').value);u.voice=synth.getVoices().find(v=>v.voiceURI===$('voices').value)||null;
+    u.onend=()=>{if(current!==epoch||!playing)return;if(index<sentences.length-1){index++;run()}else if(book&&$('autoNext').checked&&book.current<book.chapters.length-1){goToChapter(book.current+1);status('Next chapter…');speak()}else{playing=false;status(book?'Chapter complete.':'Reading complete.')}};
+    u.onerror=e=>{if(current===epoch&&e.error!=='canceled'&&e.error!=='interrupted'){playing=false;status('Narration could not play: '+e.error)}};synth.speak(u);status('Reading aloud.')}
+  run()}
+function move(n){const active=playing;stop();index=Math.max(0,Math.min(sentences.length-1,index+n));render();if(active)speak()}
+$('load').onclick=prepare;
+$('play').onclick=()=>{if(synth?.paused&&playing){synth.resume();status('Reading aloud.')}else speak()};
+$('pause').onclick=()=>{synth?.pause();status('Paused. Press Read to continue.')};
+$('stop').onclick=()=>{stop();status('Stopped.')};
+$('next').onclick=()=>move(1);$('prev').onclick=()=>move(-1);
+$('rate').oninput=()=>{$('speed').textContent=Number($('rate').value).toFixed(1)+'×';save()};
+$('size').oninput=()=>$('readout').style.fontSize=$('size').value+'px';
+$('clear').onclick=()=>{stop();$('text').value='';prepare()};
+$('text').onchange=prepare;
+$('bookmark').onclick=()=>{try{localStorage.setItem('ether-bookmark',JSON.stringify({text:$('text').value,index,chapter:book?book.current:null,bookTitle:book?.title||null}));status('Bookmark saved.')}catch{status('Bookmark could not be saved.')}};
+$('restore').onclick=()=>{try{const b=JSON.parse(localStorage.getItem('ether-bookmark'));if(!b){status('No bookmark saved yet.');return}
+  if(book&&b.bookTitle===book.title&&b.chapter!=null&&book.chapters[b.chapter])goToChapter(b.chapter);else{$('text').value=b.text;prepare()}
+  index=Math.max(0,Math.min(b.index,sentences.length-1));render();status('Bookmark restored.')}catch{status('Bookmark could not be restored.')}};
+function voices(){const old=$('voices').value;$('voices').replaceChildren();(synth?.getVoices()||[]).forEach(v=>{const o=document.createElement('option');o.value=v.voiceURI;o.textContent=v.name+' · '+v.lang;$('voices').append(o)});if(old)$('voices').value=old}
+voices();if(synth)synth.onvoiceschanged=voices;
+
+// ---------- Book storage (IndexedDB: books can be larger than localStorage allows) ----------
+function db(){return new Promise((res,rej)=>{const r=indexedDB.open('ether-reader',1);r.onupgradeneeded=()=>r.result.createObjectStore('kv');r.onsuccess=()=>res(r.result);r.onerror=()=>rej(r.error)})}
+async function idbSet(key,val){const d=await db();return new Promise((res,rej)=>{const t=d.transaction('kv','readwrite');val===undefined?t.objectStore('kv').delete(key):t.objectStore('kv').put(val,key);t.oncomplete=res;t.onerror=()=>rej(t.error)})}
+async function idbGet(key){const d=await db();return new Promise((res,rej)=>{const r=d.transaction('kv').objectStore('kv').get(key);r.onsuccess=()=>res(r.result);r.onerror=()=>rej(r.error)})}
+function saveBook(){idbSet('book',book||undefined).catch(()=>status('The book could not be saved in this browser; it will be gone after you reload.'))}
+
+// ---------- Book UI ----------
+function showBook(){$('book').hidden=!book;if(!book)return;$('bookTitle').textContent=book.title;const sel=$('chapter');sel.replaceChildren();
+  book.chapters.forEach((c,i)=>{const o=document.createElement('option');o.value=i;o.textContent=`${i+1}. ${c.title}`;sel.append(o)});updateChapterUI()}
+function updateChapterUI(){$('chapter').value=book.current;$('prevChapter').disabled=book.current<=0;$('nextChapter').disabled=book.current>=book.chapters.length-1;
+  $('chapterInfo').textContent=`Chapter ${book.current+1} of ${book.chapters.length} · ${book.chapters[book.current].text.length.toLocaleString()} characters`}
+function goToChapter(i){if(!book||!book.chapters[i])return;const was=playing;stop();book.current=i;saveBook();$('text').value=book.chapters[i].text;prepare();updateChapterUI();$('readout').scrollTop=0;if(was)speak()}
+$('chapter').onchange=()=>goToChapter(Number($('chapter').value));
+$('prevChapter').onclick=()=>goToChapter(book.current-1);$('nextChapter').onclick=()=>goToChapter(book.current+1);
+$('closeBook').onclick=()=>{stop();book=null;saveBook();showBook();status('Book closed. Your passage stays below.')};
+$('import').onchange=async e=>{const f=e.target.files[0];e.target.value='';if(!f)return;stop();$('opening').hidden=false;status('Opening '+f.name+'…');
+  try{const b=await loadBook(f);b.chapters=b.chapters.map(c=>({title:c.title,text:tidy(c.text)})).filter(c=>c.text);if(!b.chapters.length)throw new Error('No readable text was found. (A scanned PDF holds pictures of pages, not text.)');
+    book={title:b.title||f.name.replace(/\.[^.]+$/,''),chapters:b.chapters,current:0};saveBook();showBook();goToChapter(0);
+    status(book.chapters.length>1?`Opened “${book.title}” · ${book.chapters.length} chapters. Press Read.`:`Opened “${book.title}”. Press Read.`)}
+  catch(err){status('Could not open this file: '+(err.message||err))}finally{$('opening').hidden=true}};
+
+// ---------- Book loading ----------
+const tidy=s=>s.replace(/\u00a0/g,' ').replace(/[ \t]+/g,' ').replace(/ *\n */g,'\n').replace(/\n{3,}/g,'\n\n').trim();
+async function loadBook(file){const ext=(file.name.split('.').pop()||'').toLowerCase();const name=file.name.replace(/\.[^.]+$/,'');
+  if(ext==='pdf')return loadPDF(file,name);
+  if(ext==='epub')return loadEPUB(file,name);
+  if(ext==='docx')return loadDOCX(file,name);
+  if(['html','htm','xhtml'].includes(ext)){const d=new DOMParser().parseFromString(await file.text(),'text/html');return{title:d.title||name,chapters:splitIntoChapters(nodeText(d.body))}}
+  return{title:name,chapters:splitIntoChapters(await file.text())}}
+
+// Plain text: split on lines like "Chapter 4", "Part Two", "Prologue" or Markdown headings; otherwise ~6,000-character parts.
+function splitIntoChapters(raw){const lines=raw.replace(/\r\n?/g,'\n').split('\n');const head=/^\s*(#{1,2}\s+\S.*|(chapter|book|part)\s+([0-9ivxlcdm]+|[a-z-]+)\b.{0,60}|(prologue|epilogue|introduction|preface|foreword|afterword)\b.{0,40})\s*$/i;
+  const out=[];let title='Opening',buf=[];const flush=()=>{const t=buf.join('\n').trim();if(t)out.push({title,text:t});buf=[]};
+  for(const line of lines){if(line.length<=80&&head.test(line)){flush();title=line.trim().replace(/^#+\s*/,'')}else buf.push(line)}flush();
+  if(out.length>=2)return out;return splitBySize(raw)}
+function splitBySize(text,target=6000){const parts=[];let cur='';for(const p of text.split(/\n\s*\n/)){if(cur&&cur.length+p.length>target){parts.push(cur);cur=''}cur+=(cur?'\n\n':'')+p}if(cur.trim())parts.push(cur);
+  return parts.length<=1?[{title:'Full text',text}]:parts.map((t,i)=>({title:'Part '+(i+1),text:t}))}
+
+// Text from an HTML node, keeping paragraph breaks.
+function nodeText(node){if(!node)return'';node.querySelectorAll('script,style,head').forEach(n=>n.remove());node.querySelectorAll('br').forEach(n=>n.replaceWith('\n'));
+  node.querySelectorAll('p,div,h1,h2,h3,h4,h5,h6,li,blockquote,tr,section').forEach(n=>n.append('\n\n'));return tidy(node.textContent||'')}
+
+// Minimal ZIP reader (EPUB and DOCX are zip files). Uses the browser's built-in decompression.
+async function openZip(file){const buf=new Uint8Array(await file.arrayBuffer()),dv=new DataView(buf.buffer);let eocd=-1;
+  for(let i=buf.length-22;i>=Math.max(0,buf.length-65557);i--){if(dv.getUint32(i,true)===0x06054b50){eocd=i;break}}if(eocd<0)throw new Error('This file is not a valid EPUB or Word document.');
+  const count=dv.getUint16(eocd+10,true);let p=dv.getUint32(eocd+16,true);const entries={};const dec=new TextDecoder();
+  for(let n=0;n<count;n++){if(dv.getUint32(p,true)!==0x02014b50)break;const method=dv.getUint16(p+10,true),csize=dv.getUint32(p+20,true),nlen=dv.getUint16(p+28,true),xlen=dv.getUint16(p+30,true),clen=dv.getUint16(p+32,true),off=dv.getUint32(p+42,true);
+    entries[dec.decode(buf.subarray(p+46,p+46+nlen))]={method,csize,off};p+=46+nlen+xlen+clen}
+  async function read(name){const e=entries[name]??entries[Object.keys(entries).find(k=>k.toLowerCase()===name.toLowerCase())];if(!e)return null;
+    const start=e.off+30+dv.getUint16(e.off+26,true)+dv.getUint16(e.off+28,true);const data=buf.subarray(start,start+e.csize);
+    if(e.method===0)return dec.decode(data);if(e.method!==8)throw new Error('This file uses a compression the browser can’t read.');
+    if(!window.DecompressionStream)throw new Error('This browser can’t open EPUB or Word files. Try a current Chrome, Edge or Safari.');
+    return await new Response(new Blob([data]).stream().pipeThrough(new DecompressionStream('deflate-raw'))).text()}
+  return{read,names:Object.keys(entries)}}
+
+async function loadEPUB(file,name){const zip=await openZip(file);const container=await zip.read('META-INF/container.xml');if(!container)throw new Error('This EPUB has no package file.');
+  const xml=s=>new DOMParser().parseFromString(s,'application/xml');const opfPath=xml(container).querySelector('rootfile')?.getAttribute('full-path');const opfText=opfPath&&await zip.read(opfPath);if(!opfText)throw new Error('This EPUB’s package file couldn’t be read.');
+  const opf=xml(opfText),base=opfPath.includes('/')?opfPath.replace(/[^/]*$/,''):'';const title=opf.getElementsByTagNameNS('*','title')[0]?.textContent?.trim()||name;
+  const manifest={};for(const it of opf.getElementsByTagNameNS('*','item'))manifest[it.getAttribute('id')]=it.getAttribute('href');
+  const chapters=[];for(const ref of opf.getElementsByTagNameNS('*','itemref')){const href=manifest[ref.getAttribute('idref')];if(!href)continue;
+    const path=resolvePath(base,decodeURIComponent(href.split('#')[0]));const html=await zip.read(path);if(!html)continue;const d=new DOMParser().parseFromString(html,'text/html');
+    const heading=(d.querySelector('h1,h2,h3')?.textContent||d.title||'').replace(/\s+/g,' ').trim();const text=nodeText(d.body);if(text.length<=40)continue;
+    chapters.push({title:heading&&heading.length<=80?heading:'Section '+(chapters.length+1),text})}
+  return{title,chapters}}
+function resolvePath(base,href){const parts=(base+href).split('/'),out=[];for(const p of parts){if(p==='..')out.pop();else if(p&&p!=='.')out.push(p)}return out.join('/')}
+
+async function loadDOCX(file,name){const zip=await openZip(file);const docXml=await zip.read('word/document.xml');if(!docXml)throw new Error('This Word document couldn’t be read.');
+  const d=new DOMParser().parseFromString(docXml,'application/xml');const W='http://schemas.openxmlformats.org/wordprocessingml/2006/main';
+  const chapters=[];let title='Opening',buf=[],headings=0;const flush=()=>{const t=buf.join('\n\n').trim();if(t)chapters.push({title,text:t});buf=[]};
+  for(const p of d.getElementsByTagNameNS(W,'p')){let text='';for(const n of p.getElementsByTagNameNS(W,'*')){if(n.localName==='t')text+=n.textContent;else if(n.localName==='tab')text+=' ';else if(n.localName==='br')text+='\n'}
+    const style=p.getElementsByTagNameNS(W,'pStyle')[0]?.getAttributeNS(W,'val')||p.getElementsByTagNameNS(W,'pStyle')[0]?.getAttribute('w:val')||'';
+    if(/^(heading ?1|heading ?2|title)$/i.test(style)&&text.trim()){flush();title=text.trim().slice(0,80);headings++}else if(text.trim())buf.push(text)}
+  flush();if(headings>=2)return{title:name,chapters};return{title:name,chapters:splitIntoChapters(chapters.map(c=>(c.title!=='Opening'?c.title+'\n':'')+c.text).join('\n\n'))}}
+
+// PDF: uses Mozilla's pdf.js, loaded only when a PDF is opened. Chapters come from the PDF's
+// table of contents when it has one; otherwise 10 pages at a time.
+async function loadPDF(file,name){let pdfjs;try{pdfjs=await import('https://cdn.jsdelivr.net/npm/pdfjs-dist@4.10.38/build/pdf.min.mjs')}catch{throw new Error('The PDF reader couldn’t load. Check your internet connection.')}
+  pdfjs.GlobalWorkerOptions.workerSrc='https://cdn.jsdelivr.net/npm/pdfjs-dist@4.10.38/build/pdf.worker.min.mjs';
+  const pdf=await pdfjs.getDocument({data:new Uint8Array(await file.arrayBuffer())}).promise;const pages=[];
+  for(let i=1;i<=pdf.numPages;i++){const c=await (await pdf.getPage(i)).getTextContent();let s='';for(const it of c.items){s+=it.str;s+=it.hasEOL?'\n':(it.str.endsWith(' ')?'':' ')}pages.push(reflow(s));if(i%20===0)status(`Reading page ${i} of ${pdf.numPages}…`)}
+  let title=name;try{const m=await pdf.getMetadata();if(m?.info?.Title?.trim())title=m.info.Title.trim()}catch{}
+  let marks=[];try{const outline=await pdf.getOutline();for(const item of outline||[]){let dest=item.dest;if(typeof dest==='string')dest=await pdf.getDestination(dest);if(!Array.isArray(dest))continue;
+    const page=typeof dest[0]==='number'?dest[0]:await pdf.getPageIndex(dest[0]);if(page>=0&&page<pdf.numPages)marks.push({title:item.title||'Section',page})}}catch{}
+  marks.sort((a,b)=>a.page-b.page);const chapters=[];
+  if(marks.length>=2){if(marks[0].page>0)marks.unshift({title:'Opening pages',page:0});marks.forEach((m,n)=>{const end=n+1<marks.length?marks[n+1].page:pdf.numPages;if(end>m.page)chapters.push({title:m.title,text:pages.slice(m.page,end).join('\n\n')})})}
+  else for(let s=0;s<pages.length;s+=10){const e=Math.min(s+10,pages.length);chapters.push({title:e-s===1?`Page ${s+1}`:`Pages ${s+1}–${e}`,text:pages.slice(s,e).join('\n\n')})}
+  return{title,chapters}}
+function reflow(s){return s.replace(/\r/g,'\n').replace(/(\w)-\n(\w)/g,'$1$2').replace(/\n{2,}/g,'\u2029').replace(/\n/g,' ').replace(/\u2029/g,'\n\n')}
+
+// ---------- Restore ----------
+try{const saved=JSON.parse(localStorage.getItem('ether-reading'));if(saved){$('text').value=saved.text;$('rate').value=saved.rate||1;prepare();index=Math.max(0,Math.min(saved.index||0,sentences.length-1));render();$('rate').oninput()}}catch{}
+idbGet('book').then(b=>{if(b&&b.chapters?.length){book=b;book.current=Math.min(Math.max(0,book.current||0),book.chapters.length-1);showBook()}}).catch(()=>{});
+
+// ---------- Voice commands ----------
+const SR=window.SpeechRecognition||window.webkitSpeechRecognition;
+$('listen').onclick=()=>{if(!SR){$('mic').textContent='Speech controls are not supported here. Try Chrome; buttons remain available.';return}
+  if(listening){listening=false;recognition?.stop();$('listen').textContent='Enable voice controls';return}
+  recognition=new SR();recognition.continuous=true;recognition.lang='en-US';
+  recognition.onresult=e=>{for(let n=e.resultIndex;n<e.results.length;n++){if(!e.results[n].isFinal)continue;const command=e.results[n][0].transcript.toLowerCase().trim();$('mic').textContent='Heard: '+command;if(!command.includes('reader'))continue;
+    if(/chapter/.test(command)&&book){if(/next/.test(command))goToChapter(book.current+1);else if(/back|previous/.test(command))goToChapter(book.current-1)}
+    else if(/pause/.test(command))$('pause').click();else if(/stop/.test(command))$('stop').click();else if(/next/.test(command))move(1);else if(/back|previous/.test(command))move(-1);else if(/play|read|resume/.test(command))$('play').click();
+    else if(/faster|slower/.test(command)){const d=command.includes('faster')?.1:-.1;$('rate').value=Math.max(.5,Math.min(1.5,Number($('rate').value)+d));$('rate').oninput()}}};
+  recognition.onerror=e=>{listening=false;$('listen').textContent='Enable voice controls';$('mic').textContent='Microphone: '+e.error};
+  recognition.onend=()=>{listening=false;$('listen').textContent='Enable voice controls'};
+  try{recognition.start();listening=true;$('listen').textContent='Disable voice controls';$('mic').textContent='Listening for “reader…”'}catch(e){$('mic').textContent=e.message}};
+window.addEventListener('beforeunload',()=>synth?.cancel());
+</script>
+</html>
