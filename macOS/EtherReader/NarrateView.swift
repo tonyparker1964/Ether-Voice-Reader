@@ -60,21 +60,6 @@ struct NarrateView: View {
                 if !openError.isEmpty { Notice(text: openError) }
             }
 
-            Card(title: "Passage") {
-                HStack {
-                    Spacer()
-                    Button("Clear") { text = "" }.disabled(text.isEmpty)
-                }
-                TextEditor(text: $text)
-                    .font(.custom("Georgia", size: 17))
-                    .frame(minHeight: 220)
-                    .scrollContentBackground(.hidden)
-                    .padding(8)
-                    .background(Theme.background, in: RoundedRectangle(cornerRadius: 8))
-                Text("\(text.count) characters · long passages are read in parts and joined together")
-                    .font(.caption).foregroundStyle(.secondary)
-            }
-
             Card(title: "Generate") {
                 HStack {
                     if engine.generating {
@@ -101,6 +86,22 @@ struct NarrateView: View {
                     .disabled(player.loadedURL == nil)
                 }
             }
+
+            Card(title: "Passage") {
+                HStack {
+                    Spacer()
+                    Button("Clear") { text = "" }.disabled(text.isEmpty)
+                }
+                TextEditor(text: $text)
+                    .font(.custom("Georgia", size: 17))
+                    .frame(minHeight: 220)
+                    .scrollContentBackground(.hidden)
+                    .padding(8)
+                    .background(Theme.background, in: RoundedRectangle(cornerRadius: 8))
+                Text("\(text.count) characters · long passages are read in parts and joined together")
+                    .font(.caption).foregroundStyle(.secondary)
+            }
+
         }
         .onAppear {
             if let last = engine.lastNarration, player.loadedURL == nil { player.load(last) }
